@@ -20,17 +20,20 @@ def extract_doc(file_name: str, folder_name):
 def replace_xml_doc(file_location):
     tree = xmlET.parse(file_location)
     root = tree.getroot()
-    namespaces = {'w': 'http://schemas.openxmlformats.org/wordprocessingml/2006/main'}
+    namespaces = {
+        'w': 'http://schemas.openxmlformats.org/wordprocessingml/2006/main'}
 
+    words = set()
     for e in root.findall('.//w:t', namespaces):
-        e.text = get_func(e.text, True)
+        words.add(e.text)
 
-    tree.write(file_location)
-
-    with open(file_location, 'r+', encoding='utf-8') as file:
-        contect = file.read()
-        contect = contect.replace('ns0:', 'w:')
-        file.write(contect)
+    with open(file_location, 'r', encoding='utf-8') as file:
+        content = file.read()
+        for word in words:
+            content = content.replace(
+                f'{word}</w:t>', f'{get_func(word)}</w:t>')
+        with open(file_location, 'w', encoding='utf-8') as out_file:
+            out_file.write(content)
 
 
 def collect_doc(folder_name):
